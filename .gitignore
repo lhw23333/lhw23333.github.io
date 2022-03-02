@@ -1,27 +1,18 @@
-*~
-~*
-*.diff
-*.patch
-*.bak
-.DS_Store
-*.swp
-*.swo
-*.log
-*.log.*
+# hidden files
+.*
+!.git*
+!.editorconfig
+!.nojekyll
+!.travis.yml
 
-/.vscode/
-
-node_modules/
-.sass-cache/
-
-/.bundle/
-/vendor/bundle
-*.gem
-
-yarn.lock
-package-lock.json
+# bundler cache
+_site
+vendor
 Gemfile.lock
 
-_site/
-.jekyll-metadata
-.jekyll-cache/
+# rubygem
+*.gem
+
+# npm dependencies
+node_modules
+package-lock.json
