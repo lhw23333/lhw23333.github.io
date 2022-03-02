@@ -1,15 +1,8 @@
-https://zhuanlan.zhihu.com/p/138484024  浅谈Virtual Texture  
-https://www.bilibili.com/video/BV1KK411L7Rg  irtual Texture（虚拟纹理）的理解和应用 | Epic 李文磊  
-https://zhuanlan.zhihu.com/p/143709152 游戏引擎随笔 0x14：UE4 Runtime Virtual Texture 实现机制及源码解析
-https://www.zhihu.com/question/453803452/answer/1828213316 Virtual Texture的意义是什么？  
-https://zhuanlan.zhihu.com/p/85417843基于Unity3D引擎的大地形加载研究  
-
-https://zhuanlan.zhihu.com/p/148283184 Virtual Texture in Modern Graphics API
-
 ---
 title: Welcome
-tags: 渲染相关
+tags: VT
 ---
+
 
 <!-- TOC -->
 
@@ -29,6 +22,15 @@ tags: 渲染相关
 - [到底是时间换空间还是空间换时间](#到底是时间换空间还是空间换时间)
 
 <!-- /TOC -->
+
+
+https://zhuanlan.zhihu.com/p/138484024  浅谈Virtual Texture  
+https://www.bilibili.com/video/BV1KK411L7Rg  irtual Texture（虚拟纹理）的理解和应用 | Epic 李文磊  
+https://zhuanlan.zhihu.com/p/143709152 游戏引擎随笔 0x14：UE4 Runtime Virtual Texture 实现机制及源码解析
+https://www.zhihu.com/question/453803452/answer/1828213316 Virtual Texture的意义是什么？  
+https://zhuanlan.zhihu.com/p/85417843基于Unity3D引擎的大地形加载研究  
+
+https://zhuanlan.zhihu.com/p/148283184 Virtual Texture in Modern Graphics API
 
 ### Virtual Texture 
 纹理映射用于将表面细节添加到几何图元中，能更有效的管理和渲染表面细节。
