@@ -1,6 +1,7 @@
 ---
-title: Welcome
-tags: VT
+title: Virtual Texture
+tags: vt RVT SVT
+categories: 渲染管线
 ---
 
 
