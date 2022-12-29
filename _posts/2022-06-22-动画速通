@@ -1,0 +1,52 @@
+---
+title: 动画速通
+tags: 动画
+categories: 引擎  动画
+---
+
+https://www.52vr.com//extDoc/ue4/CHN/Engine/Animation/Overview/index.html#%E7%B3%BB%E7%BB%9F%E5%88%86%E8%A7%A3
+
+https://zhuanlan.zhihu.com/p/74554876   Exploring in UE4
+
+## 动画驱动所需资源
+- Skeleton 骨骼
+- SkeletonMesh 蒙皮Mesh
+这个时候我们的角色就想一个手办，可以通过修改骨骼信息 来摆出各种各样的造型动作，但在游戏中我们还需要一个系统去驱动角色能平滑的播放和切换各种设计师摆出的造型，这就需要动画系统
+-  AnimationSequence（动画序列）是一个可以在骨架网格体上播放的独立的动画资源。它们包含了一些关键帧，这些关键帧可以及时地指出某个特定点处的一个骨骼的位置、旋转度及缩放比例。通过回放序列中的这些关键帧，并在将它们互相混合，使得骨架网格体可以产生平滑的动画效果。
+- Blending Animations（混合动画） 使用 混合节点 和 混合空间 后，可将各种动画混合在一起，实现一个 更为复杂的最终姿势。举例而言，跑步动画可以和瞄准姿势 或者面部表情动画混合，实现一边跑步一边举枪瞄准，或者一边跑步一边说话的最终效果；并且在这种状态下 保持源动画的独立。这样即可在各种不同情形下对单一源动画 进行重复利用。
+- 空间变换 本地空间假设 骨骼的变换是相对于那根骨骼进行的。组件空间假设该骨骼的变换是相对于 SkeletalMeshComponent（骨架网格物体组件） 的。  一般动画蓝图在应用动画时，这些信息位于骨骼空间中，但是混合节点和所有的SkeletalControls（骨架控制） 都是在组件空间中运作的。
+- AnimNotifies 动画通知 设置在动画序列的特定点处发生的事件，但是当帧率降低，动画系统跳过某些动画时，可能会出现不会通知的情况，所以尽量使用Notify State
+- Anim montage
+- SkeletalControls(骨骼控制器)可以直接控制骨架中的骨骼。这些骨架控制器可以用于在 Animation Blueprints（动画蓝图） 中控制一个单独的骨骼、创建IK链等。这种直接控制底层 骨架 的方式可以创建程序化的、动态可变的动画。一个骨骼的 变换 可以用于驱动另一个骨骼；或者当播放一般的走路动画时，可以使用踪迹来使得角色的脚部贴合地面。您可以应用任何类型的修改来调整或完全覆盖 AnimationSequences（动画序列） 对骨骼的 变换操作_ 。
+
+下图为动画系统特定部分创建和编辑的简单分解。
+![image](https://www.52vr.com//extDoc/ue4/images/Engine/Animation/Overview/CreationDiagram.jpg)
+
+此图表说明了虚幻引擎中典型动画角色数据的流动和所有权。
+![image](https://www.52vr.com//extDoc/ue4/images/Engine/Animation/Overview/AnimationDiagram.jpg)
+
+## 概述
+通过动画驱动时，角色位移一般可以分为两种处理方式，LocalMotion  和 RootMotion
+
+可以简单理解为LocalMotion 程序控制单位移动，RootMotion则使用动画的位移数据，两者都有各自的使用场景，比如一些基础移动，需要响应玩家输入的位移动画中，就需要使用LocalMotion来控制移动，以此来响应输入操作，但在急停过程中，会因为动画和位移不匹配的原因导致滑步的问题，一般会通过一个特殊的快速的停止动画使用RootMotion停止下来，通过最后一段的RM动画使得脚步和移动匹配上。
+RootMotion则主要用于复杂花哨的攻击动画上，很简单的一点，我们很难在动作游戏中边移动边攻击，就是因为在做攻击动画时，我们没有办法只做上半身，腿部肯定有相应的Pos，所以一般都会使用RootMotion驱动。并且在设计中鼓励玩家使用位移攻击代替跑动中的轻攻击（鬼泣前冲劈砍）
+
+#### 相关注意
+1. 角色的根骨格应该在原点且无旋转的（上墙开发灾难）
+2. RootMotionMode有四个选项，含义如下：
+- NoRootMotionExtraction 表示不会处理其动画内含的Transform数据
+- IgnoreRootMotion 表示会解压出来Transform数据但是不应用
+- RootMotionFromEverything 表示解析所有含有Rootmotion动画资源都可以去解析其Transform数据并参与到整个动画系统的权重计算
+- RootMotionFromMontagesOnly 表示只取蒙太奇的Transform数据作为Rootmotion的计算
+3. 支持网络同步 理论上AnimSequence, Blendspace, AnimMontage都可以支持网络同步，但是这样在网络环境下会有几个问题，比如提高动画同步的复杂度、影响游戏性能、提高预测难度、容易破坏动画表现等，所以一般我们要关闭Montage以外的同步，将Root Motion Mode设置为Root Motion From Montages Only。如果开启了动画资源的Rootmotion但是不设置RootMotionMode会有卡顿的表现。  
+实际上，虽然Rootmotion支持Montages的网络同步，但是由于其预测难度远大于普通移动，在网络环境不稳定的情况下，表现是相当糟糕的。因此，在多人游戏的时候，要适度的使用Rootmotion。
+
+## Rootmotion单机执行流程与原理
+#### 动画数据初始化
+【对于动画蓝图里面的动画数据】
+1. 对于动画蓝图里面的动画数据  绑定动画蓝图的Character进入场景时就已经开始了各种动画数据相关的初始化（UAnimInstance::InitializeAnimation），随后通过UpdateAnimation不断的更新动画蓝图里面的逻辑，同时把一部分逻辑交给了FAnimInstanceProxy处理。
+【对于非动画蓝图里面的Montage数据】
+2. 一般是玩家手动触发Montage的播放，通过USkeletalMeshComponent找到对应的AnimInstance并执行UAnimInstance::Montage_Play
+3. 创建一个FAnimMontageInstance并进行相关的初始化，开始真正的播放蒙太奇
+4. 判断蒙太奇是否带有Rootmontion，是的话将赋值给RootMotionMontageInstance，用于后续的ACharacter::IsPlayingNetworkedRootMotionMontage判断
+   
